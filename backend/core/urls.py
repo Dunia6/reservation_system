@@ -33,14 +33,13 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   permission_classes=(permissions.AllowAny,),
-#    permission_classes=[permissions.IsAdminUser, permissions.IsAuthenticated],
-#    authentication_classes=[JWTAuthentication,],
+   permission_classes=[permissions.IsAdminUser, permissions.IsAuthenticated],
+   authentication_classes=[JWTAuthentication,],
 )
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('my_admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
     path('api/', include('rooms.urls')),
     path('api/', include('reservation.urls')),
@@ -59,4 +58,5 @@ if settings.DEBUG:
 else:
     urlpatterns += [
         re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     ]

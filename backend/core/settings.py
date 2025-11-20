@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f_g-(*9^ertue9o68s#a7kcb0_m2c_i+q6ngpv^#p#*(dcls*^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["metro-composite-shares-stadium.trycloudflare.com", "127.0.0.1"]
 
@@ -59,6 +59,11 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
+    # WhiteNoise Middleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+
     'django.contrib.sessions.middleware.SessionMiddleware',
 
     # Cors Middleware
@@ -138,6 +143,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
