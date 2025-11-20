@@ -227,7 +227,8 @@
                         <button 
                             v-else
                             class="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition"
-                        >
+                            @click="$router.push('/reservation')"
+                            >
                         
                             Faire une réservation
                         </button>

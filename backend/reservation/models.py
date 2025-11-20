@@ -81,6 +81,9 @@ class Reservation(models.Model):
         """Calculate remaining amount to pay"""
         return self.total_price - self.paid_amount
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return f"Reservation {self.id} - {self.guest.name}"
 

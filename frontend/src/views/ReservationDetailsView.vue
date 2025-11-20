@@ -178,7 +178,7 @@
                                     </span>
                                 </div>
                                 <button 
-                                    v-if="reservation.status === 'confirmed' || reservation.status === 'checked_in'"
+                                    v-if="room.room_status !== 'available'"
                                     @click="releaseRoom(room)"
                                     :class="[
                                         'text-white px-3 py-1 rounded text-sm font-medium transition flex items-center gap-1',
@@ -207,7 +207,7 @@
                                 <div>
                                     <p class="text-sm text-gray-600">Statut</p>
                                     <span :class="getRoomStatusBadge(room.room_status)">
-                                        {{ room.room_status || 'Occupée' }}
+                                        {{ room.room_status == 'available' ? 'Disponible' : 'Occupée' }}
                                     </span>
                                 </div>
                                 <div v-if="room.notes" class="col-span-2">

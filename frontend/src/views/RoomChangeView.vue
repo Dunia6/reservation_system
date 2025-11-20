@@ -101,7 +101,7 @@
 
                     <!-- Frais d'échange -->
                     <div v-if="formData.new_room_id">
-                        <label class="block text-sm text-gray-700 mb-2">Frais de l'échange (FC)</label>
+                        <label class="block text-sm text-gray-700 mb-2">Frais de l'échange</label>
                         <input 
                             v-model.number="formData.exchange_fee"
                             type="number" 

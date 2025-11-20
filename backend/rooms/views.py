@@ -16,10 +16,10 @@ class RoomViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_permissions(self):
-        """Receptionniste: lecture seule, Manager et Superviseur: toutes opérations"""
-        if self.action in ['list', 'retrieve', 'occupancy_stats']:
+        """Receptionniste: lecture seule et patch, Manager et Superviseur: toutes opérations"""
+        if self.action in ['list', 'retrieve', 'occupancy_stats', 'partial_update']:
             return [IsAuthenticated()]
-        return [IsManager() | IsSuperviseur()]
+        return [IsManager(), IsSuperviseur()]
     
     def get_serializer_class(self):
         if self.action == 'retrieve':

@@ -75,7 +75,6 @@
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                 placeholder="Entrez le montant"
                             >
-                            <span class="absolute right-4 top-3 text-gray-500 font-medium">FC</span>
                         </div>
                         <p class="text-xs text-gray-500 mt-1">Maximum: {{ formatPrice(reservation.remaining_amount) }}</p>
                     </div>

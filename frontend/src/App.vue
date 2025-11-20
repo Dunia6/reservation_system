@@ -15,7 +15,7 @@ const { user } = storeToRefs(authStore);
 
 const showHeader = computed(() => {
     // Afficher le header sur toutes les pages sauf la page de login
-    return route.path !== '/login' && authStore.isAuthenticated;
+    return route.path !== '/login' && authStore.isAuthenticated &&  route.name !== 'invoice';
 });
 
 const logout = () => {

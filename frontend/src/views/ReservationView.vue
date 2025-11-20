@@ -490,19 +490,31 @@ async function handleSubmit() {
 
     // Utiliser le store pour créer la réservation
     const result = await reservationStore.createReservation(reservationData)
-    
-    push.success({
-      message: `Réservation créée avec succès ! ${selectedRooms.value.length} chambre(s) réservée(s).`,
-      duration: 4000
-    });
-    
-    // Recharger les chambres
-    await roomStore.fetchRooms()
 
-    // Redirection après 1 seconde
-    setTimeout(() => {
-      router.push('/')
-    }, 1000)
+    if (result) {
+      
+
+        console.log('✅ Réservation multiple créée:', result)
+
+        push.success({
+            message: `Réservation créée avec succès ! ${selectedRooms.value.length} chambre(s) réservée(s).`,
+            duration: 4000
+        });
+
+        // Recharger les chambres
+        await roomStore.fetchRooms()
+        await reservationStore.getReservationById(result.id)
+
+        // Redirection après 1 seconde
+        setTimeout(() => {
+            router.push('/invoices/' + result?.id)
+        }, 1000)
+
+    }
+    
+    
+    
+    
 
   } catch (error) {
     console.error('❌ Erreur:', error)
