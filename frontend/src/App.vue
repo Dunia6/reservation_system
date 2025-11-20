@@ -10,16 +10,18 @@ import logo from '@/assets/images/logo.png';
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
+const { isAuthenticated } = storeToRefs(authStore);
 const { canAccessDashboard, canManageConfig } = usePermissions();
 const { user } = storeToRefs(authStore);
 
 const showHeader = computed(() => {
     // Afficher le header sur toutes les pages sauf la page de login
-    return route.path !== '/login' && authStore.isAuthenticated &&  route.name !== 'invoice';
+    return route.path !== '/login' && isAuthenticated.value &&  route.name !== 'invoice';
 });
 
-const logout = () => {
-    authStore.logout();
+const logout = async () => {
+    await authStore.logout();
+
     router.push('/login');
 };
 
