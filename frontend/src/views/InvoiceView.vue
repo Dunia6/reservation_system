@@ -66,6 +66,7 @@
                             <div v-else class="mb-3">
                                 <h2 class="text-2xl font-bold text-gray-900">Hôtel</h2>
                             </div>
+                            
                             <div v-if="companyInfo" class="text-sm text-gray-600 space-y-1">
                                 <p>{{ companyInfo.avenue }}, {{ companyInfo.quarter }}</p>
                                 <p>{{ companyInfo.commune }}, {{ companyInfo.city }}</p>
@@ -281,8 +282,8 @@ const route = useRoute();
 const reservationStore = useReservationStore();
 
 const { currentReservation: reservation, loading, error } = storeToRefs(reservationStore);
-const companyInfo = ref(null);
-const { formatCurrency, loadCompanyInfo } = useCurrency();
+// const companyInfo = ref(null);
+const { formatCurrency, loadCompanyInfo, companyInfo } = useCurrency();
 
 onMounted(async () => {
     const id = route.params.id;
