@@ -74,9 +74,7 @@
                                 <p v-if="companyInfo.email">Email: {{ companyInfo.email }}</p>
                             </div>
                             <div v-else class="text-sm text-gray-600 space-y-1">
-                                <p>Avenue de la Liberté</p>
-                                <p>Kinshasa, RDC</p>
-                                <p>Tél: +243 900 000 000</p>
+                                <p>Ajouter les autres informations de l'entreprise</p>
                             </div>
                         </div>
                     </div>
