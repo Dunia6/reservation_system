@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import CompanyInformation
 from .serializers import CompanyInformationSerializer
-from core.permissions import IsManager, IsSuperviseur
+from core.permissions import IsManager, IsSuperviseur, IsManagerOrSuperviseur
 
 
 class CompanyInformationViewSet(viewsets.ModelViewSet):
@@ -17,7 +17,7 @@ class CompanyInformationViewSet(viewsets.ModelViewSet):
         """Lecture pour tous, modification pour Manager et Superviseur"""
         if self.action in ['list', 'retrieve', 'current']:
             return [IsAuthenticated()]
-        return [IsManager() | IsSuperviseur()]
+        return [IsManagerOrSuperviseur()]
     
     @action(detail=False, methods=['get'])
     def current(self, request):

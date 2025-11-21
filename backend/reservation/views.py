@@ -15,7 +15,7 @@ from .serializers import (
     GuestSerializer,
     RoomChangeSerializer
 )
-from core.permissions import IsManager, IsSuperviseur
+from core.permissions import IsManager, IsSuperviseur, IsManagerOrSuperviseur
 
 
 class ReservationViewSet(viewsets.GenericViewSet):
@@ -33,9 +33,10 @@ class ReservationViewSet(viewsets.GenericViewSet):
     
     def get_permissions(self):
         """Permissions par action: destroy et dashboard_stats restreints"""
+
         if self.action == 'destroy':
             # Seuls Manager et Superviseur peuvent annuler
-            return [IsManager() | IsSuperviseur()]
+            return [IsManagerOrSuperviseur()]
         elif self.action == 'dashboard_stats':
             # Seul Superviseur peut accéder aux statistiques
             return [IsSuperviseur()]

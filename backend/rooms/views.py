@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.db.models import Count, Q
 from .models import Room, RoomType, Floor
 from .serializers import RoomSerializer, RoomDetailSerializer, RoomTypeSerializer, FloorSerializer
-from core.permissions import IsManager, IsSuperviseur
+from core.permissions import IsManager, IsSuperviseur, IsManagerOrSuperviseur
 
 # Create your views here.
 
@@ -81,7 +81,7 @@ class RoomTypeViewSet(viewsets.ModelViewSet):
         """Manager et Superviseur peuvent créer/modifier, tous peuvent lire"""
         if self.action in ['list', 'retrieve']:
             return [IsAuthenticated()]
-        return [IsManager() | IsSuperviseur()]
+        return [IsManagerOrSuperviseur()]
 
 
 class FloorViewSet(viewsets.ModelViewSet):
@@ -95,4 +95,4 @@ class FloorViewSet(viewsets.ModelViewSet):
         """Manager et Superviseur peuvent créer/modifier, tous peuvent lire"""
         if self.action in ['list', 'retrieve']:
             return [IsAuthenticated()]
-        return [IsManager() | IsSuperviseur()]
+        return [IsManagerOrSuperviseur()]
