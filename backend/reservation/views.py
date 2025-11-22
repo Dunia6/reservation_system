@@ -359,6 +359,68 @@ class ReservationViewSet(viewsets.GenericViewSet):
             )
     
     @swagger_auto_schema(
+        operation_description="Checkout reservation - mark as checked out and release all rooms",
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'message': openapi.Schema(type=openapi.TYPE_STRING),
+                    'rooms_released': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                    'reservation_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+                }
+            ),
+            400: 'Bad Request - Cannot checkout reservation',
+            404: 'Reservation not found'
+        },
+        tags=['Reservations']
+    )
+    @action(detail=True, methods=['post'])
+    def checkout(self, request, pk=None):
+        """Checkout reservation - mark as checked out and release all rooms"""
+        try:
+            reservation = self.get_queryset().get(pk=pk)
+            
+            # Check if reservation can be checked out
+            if reservation.status == 'checked_out':
+                return Response(
+                    {"error": "Cette réservation a déjà été check-out."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if reservation.status == 'cancelled':
+                return Response(
+                    {"error": "Impossible de faire le check-out d'une réservation annulée."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Release all rooms and set status back to available
+            rooms_released = []
+            for reservation_room in reservation.reservation_rooms.all():
+                room = reservation_room.room
+                room.status = 'available'
+                room.save()
+                rooms_released.append(room.number)
+            
+            # Update reservation status to checked_out
+            reservation.status = 'checked_out'
+            reservation.save()
+            
+            return Response(
+                {
+                    "message": "Check-out effectué avec succès.",
+                    "rooms_released": rooms_released,
+                    "reservation_id": reservation.id
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        except Reservation.DoesNotExist:
+            return Response(
+                {"error": "Réservation non trouvée."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @swagger_auto_schema(
         operation_description="Release a specific room from a reservation",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,

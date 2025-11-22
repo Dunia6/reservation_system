@@ -11,21 +11,6 @@
                         Détail de la Réservation {{ reservation ? `#${reservation.id}` : '' }}
                     </h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Bouton d'annulation -->
-                    <button
-                        v-if="reservation && canCancelReservation(reservation.status) && hasPermissionToCancel"
-                        @click="cancelReservation"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2 font-medium"
-                        :disabled="cancelling"
-                    >
-                        <svg v-if="!cancelling" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        {{ cancelling ? 'Annulation...' : 'Annuler la Réservation' }}
-                    </button>
-                </div>
             </div>
         </div>
     </header>
@@ -371,6 +356,33 @@
                             Ajouter un paiement
                         </RouterLink>
                         
+                        <!-- Bouton Check-out -->
+                        <button
+                            v-if="reservation && canCheckout(reservation.status)"
+                            @click="checkoutReservation"
+                            class="block w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-center"
+                            :disabled="checkingOut"
+                        >
+                            <svg v-if="!checkingOut" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block mr-2"></div>
+                            {{ checkingOut ? 'Check-out...' : 'Check-out' }}
+                        </button>
+
+                        <!-- Bouton d'annulation -->
+                        <button
+                            v-if="reservation && canCancelReservation(reservation.status) && hasPermissionToCancel"
+                            @click="cancelReservation"
+                            class="block w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 transition text-center"
+                            :disabled="cancelling"
+                        >
+                            <svg v-if="!cancelling" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block mr-2"></div>
+                            {{ cancelling ? 'Annulation...' : 'Annuler la Réservation' }}
+                        </button>
                     </div>
                 </div>
 
@@ -615,12 +627,35 @@ const releaseRoom = async (room) => {
     }
 };
 
-// État pour l'annulation
+// États pour les actions
 const cancelling = ref(false);
+const checkingOut = ref(false);
+
+// Vérifier si une réservation peut être check-out
+const canCheckout = (status) => {
+    // Peut faire checkout si confirmée ou client arrivé, et pas déjà checked_out ou annulée
+    return ['confirmed', 'checked_in'].includes(status);
+};
 
 // Vérifier si une réservation peut être annulée
 const canCancelReservation = (status) => {
-    return status !== 'cancelled' && status !== 'checked_out';
+    if (status === 'cancelled' || status === 'checked_out') {
+        return false;
+    }
+    
+    // Vérifier si toutes les chambres sont disponibles (libérées)
+    if (reservation.value?.reservation_rooms) {
+        const allRoomsAvailable = reservation.value.reservation_rooms.every(room => {
+            return room.room_status === 'available';
+        });
+        
+        // Si toutes les chambres sont disponibles, pas besoin d'annuler
+        if (allRoomsAvailable) {
+            return false;
+        }
+    }
+    
+    return true;
 };
 
 // Annuler la réservation
@@ -677,7 +712,54 @@ const cancelReservation = async () => {
     }
 };
 
-
+// Check-out de la réservation
+const checkoutReservation = async () => {
+    if (!reservation.value) return;
+    
+    const confirmMessage = `Confirmer le check-out de cette réservation ?\n\n` +
+        `Réservation #${reservation.value.id}\n` +
+        `Client: ${reservation.value.guest.name}\n` +
+        `Chambres: ${reservation.value.reservation_rooms.length}\n\n` +
+        `✓ Toutes les chambres seront libérées\n` +
+        `✓ Le statut passera à "Client parti"\n` +
+        `✓ Les chambres redeviendront disponibles`;
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    checkingOut.value = true;
+    
+    try {
+        // Appel à l'endpoint checkout
+        const response = await apiFetch(`/api/reservations/${reservation.value.id}/checkout/`, {
+            method: 'POST'
+        });
+        
+        console.log('Check-out effectué:', response);
+        
+        // Notification de succès
+        push.success({
+            title: '✅ Check-out effectué',
+            message: `${response.message}\n${response.rooms_released.length} chambre(s) libérée(s): ${response.rooms_released.join(', ')}`,
+            duration: 5000
+        });
+        
+        // Recharger les détails de la réservation
+        await reservationStore.getReservationById(route.params.id);
+        
+    } catch (error) {
+        console.error('Erreur lors du check-out:', error);
+        
+        push.error({
+            title: '❌ Erreur de check-out',
+            message: error.message || 'Impossible de faire le check-out',
+            duration: 5000
+        });
+    } finally {
+        checkingOut.value = false;
+    }
+};
 
 const getPaymentStatusClass = (status) => {
     const classes = {
