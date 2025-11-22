@@ -19,7 +19,7 @@ class RoomViewSet(viewsets.ModelViewSet):
         """Receptionniste: lecture seule et patch, Manager et Superviseur: toutes opérations"""
         if self.action in ['list', 'retrieve', 'occupancy_stats', 'partial_update']:
             return [IsAuthenticated()]
-        return [IsManager(), IsSuperviseur()]
+        return [IsManagerOrSuperviseur()]
     
     def get_serializer_class(self):
         if self.action == 'retrieve':
